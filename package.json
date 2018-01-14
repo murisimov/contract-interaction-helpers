@@ -1,0 +1,10 @@
+{
+  "name": "contract-interaction-helpers",
+  "version": "0.0.1",
+  "dependencies": {
+    "web3": "0.20.0",
+    "web3-provider-engine": "13.3.4",
+    "ethereumjs-wallet": "0.6.0",
+    "truffle-contract": "3.0.1"
+  }
+}
