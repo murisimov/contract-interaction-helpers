@@ -1,6 +1,14 @@
 {
   "name": "contract-interaction-helpers",
   "version": "0.0.1",
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "web3",
+    "truffle"
+  ],
+  "author": "https://github.com/murisimov",
+  "license": "LGPL-3.0",
   "dependencies": {
     "web3": "0.20.0",
     "web3-provider-engine": "13.3.4",
