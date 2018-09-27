@@ -1,20 +1,31 @@
 "use strict";
 
-const { engine, startEngine, loadContract, getTopics, ParseLogs, error, missing } = require("./auxiliary");
 
-const RPC_URL = ""  // FIXME
-const ABI = [];  // FIXME: Your contract ABI
-const PRIVATE_KEY = "";  // FIXME: Better fetch it from some safe place
-const CONTRACT_ADDRESS = "";  // FIXME
-const METHOD = process.argv[2] ? process.argv[2] : error(missing("METHOD"));  //
-const ARGS = process.argv.slice(3);
+const config = require('./config');
+const deployed = require('./deployed');
+const {
+    engine,
+    startEngine,
+    loadContract,
+    // getTopics, ParseLogs,
+    pretty_print,
+    error, missing
+} = require("./auxiliary");
 
 
-const sender = startEngine(engine, RPC_URL, PRIVATE_KEY);
-const instance = loadContract(ABI, engine, CONTRACT_ADDRESS, sender);
+const NETWORK = process.argv[2] ? process.argv[2] : error(missing("NETWORK ID"));
+const NAME = process.argv[3] ? process.argv[3] : error(missing("CONTRACT NAME"));
+const METHOD = process.argv[4] ? process.argv[4] : error(missing("CONTRACT METHOD"));  //
+const ARGS = process.argv.slice(5);
 
-const topics = getTopics(ABI);
-const parseLogs = ParseLogs(topics);
+const network = config[NETWORK];
+const sender = startEngine(engine, network.rpcUrl, network.privKey);
+const abstraction = loadContract(NAME, engine, sender, NETWORK);
+const instance = abstraction.at(deployed[NETWORK][NAME].address);
+
+
+// const topics = getTopics(deployed[NAME].ABI);
+// const parseLogs = ParseLogs(topics);
 
 let tx;
 if (ARGS.length) {
@@ -30,12 +41,13 @@ tx.then(async (result) => {
         console.log(`CUMULATIVE GAS USED: ${result.receipt.cumulativeGasUsed}`);
         console.log(`STATUS: ${result.receipt.status}`);
 
-        if (result.receipt.logs.length) {
-            const parsedLogs = parseLogs(result);
-            parsedLogs.forEach(v => console.log(v));
-        }
+        pretty_print(result);
+        // if (result.receipt.logs.length) {
+        //     const parsedLogs = parseLogs(result);
+        //     parsedLogs.forEach(v => console.log(v));
+        // }
     } else {
-        console.log(result);
+        pretty_print(result);
     }
 
     await engine.stop();
