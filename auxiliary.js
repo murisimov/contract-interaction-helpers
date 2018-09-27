@@ -41,18 +41,23 @@ const pretty_print = (data, {showHidden = false, depth = null, colors = true} = 
 
 
 /**
- * Setup and start web3-provider-engine instance, return default sender address.
+ * Setup and start web3-provider-engine instance, return default sender address
  *
  * @param engine
  * @param rpcUrl
  * @param privateKey
- * @returns {string}
+ * @returns sender address
  */
 function startEngine(engine, rpcUrl, privateKey) {
+    if (privateKey.slice(0, 2) === '0x') {
+        privateKey = privateKey.slice(2);
+    }
     const wallet = ethereumjsWallet.fromPrivateKey(new Buffer(privateKey, 'hex'));
     const sender = '0x' + wallet.getAddress().toString('hex');
     engine.addProvider(new WalletSubprovider(wallet, {}));
     const subProvider = new Web3.providers.HttpProvider(rpcUrl);
+
+    // Ensure provider to have `sendAsync` method
     if (typeof subProvider.sendAsync !== "function") {
         subProvider.sendAsync = function() {
             return subProvider.send.apply(
@@ -68,9 +73,8 @@ function startEngine(engine, rpcUrl, privateKey) {
 }
 
 /**
- * Create TruffleContract instance based on contract abi and address,
- * make it use given provider and interact with the contract from the
- * given sender address by default.
+ * Create TruffleContract abstraction, setup
+ * its provider, default sender and gas amount
  *
  * @param name
  * @param provider
